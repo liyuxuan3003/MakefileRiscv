@@ -92,7 +92,7 @@ ${BUILD_DIR}/%.d: %.c | ${BUILD_DIR}
 	sed -r -e 's|$*\.o[ :]*|${BUILD_DIR}/$*.o $@: |g' -i $@
 	${NOTIFY_DONE}
 
-# Include dependence file if goal is not clean or clean-all
-ifeq ($(filter clean ${MAKECMDGOALS}),)
+# Include dependence file if goal is not clean
+ifeq ($(filter clean,${MAKECMDGOALS}),)
 sinclude ${DEPS}
 endif
