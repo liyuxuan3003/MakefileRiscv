@@ -16,6 +16,12 @@ CC_FLAGS?=
 # Flags for link
 LD_FLAGS?=
 
+# Tool objcopy
+OBJCOPY?=riscv-none-elf-objcopy
+
+# Flags for objcopy
+OBJCOPY_FLAGS?=-O binary
+
 # Source files for C (.c)
 SRCS_C?=$(wildcard *.c)
 
@@ -60,29 +66,31 @@ ${BUILD_DIR}:
 	mkdir -p ${BUILD_DIR}
 	${NOTIFY_DONE}
 
+# Generate bin file
+${BINFILE}: ${PROGRAM}
+	${OBJCOPY} ${OBJCOPY_FLAGS}	$< $@
+	${NOTIFY_DONE}
+
 # Link object files to program
 ${PROGRAM}: ${OBJS}
-	${CC_BIN} ${LDFLAGS} -o $@ $^
+	${CC_BIN} ${LD_FLAGS} -o $@ $^
 	${NOTIFY_DONE}
 
 # Compile c source file to object file 
-${BUILD_DIR}/%.o: %.c
-	${CCBIN} ${CFLAGS} -o $@ -c $<
+${BUILD_DIR}/%.o: %.c | ${BUILD_DIR}
+	${CC_BIN} ${CC_FLAGS} -o $@ -c $<
 	${NOTIFY_DONE}
-	
-# Compile cpp source file to object file
-${BUILD_DIR}/%.o: %.cpp
-	${CXXBIN} ${CXXFLAGS} -o $@ -c $<
+
+# Compile asm source file to object file 
+${BUILD_DIR}/%.o: %.s | ${BUILD_DIR}
+	${CC_BIN} ${CC_FLAGS} -o $@ -c $<
 	${NOTIFY_DONE}
 
 # Create c source file dependence file
-${BUILD_DIR}/%.d: %.c
-	${CCBIN} -M ${CFLAGS} $< -o $@
+${BUILD_DIR}/%.d: %.c | ${BUILD_DIR}
+	${CC_BIN} -M ${CC_FLAGS} $< -o $@
 	sed -r -e 's|$*\.o[ :]*|${BUILD_DIR}/$*.o $@: |g' -i $@
 	${NOTIFY_DONE}
-
-# Build directory should be order only prerequest of dependence file
-${DEPS}: | ${BUILD_DIR}
 
 # Include dependence file if goal is not clean or clean-all
 ifeq ($(filter clean ${MAKECMDGOALS}),)
