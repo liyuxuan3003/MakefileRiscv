@@ -95,7 +95,7 @@ ${DMPFILE}: ${PROGRAM}
 
 # Link object files to program
 ${PROGRAM}: ${SRCS_LD} ${OBJS}
-	${CC_BIN} ${LD_FLAGS} -T ${SRCS_LD} -nostartfiles -o $@ ${OBJS}
+	${CC_BIN} ${CC_FLAGS} ${LD_FLAGS} -T ${SRCS_LD} -nostartfiles -o $@ ${OBJS}
 	${NOTIFY_DONE}
 
 # Compile asm source file to object file 
